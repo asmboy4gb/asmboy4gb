@@ -1,0 +1,117 @@
+\documentclass[a5paper,9pt]{extarticle}
+\usepackage{graphicx,amssymb, amstext, amsmath, epstopdf, booktabs, verbatim, gensymb, geometry, appendix, natbib}
+\geometry{a5paper,total={5.3in, 7.4in}}
+
+\usepackage{multicol} 
+\usepackage[ngerman]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+\usepackage[babel,german=guillemets]{csquotes}
+
+\usepackage[sc]{mathpazo}
+
+\usepackage{verbatim} 
+\usepackage{listings} 
+
+
+\usepackage{blindtext}
+\usepackage{titlesec}
+\usepackage{xcolor}
+
+\NewDocumentCommand\Address{m}{%
+\texttt{\colorbox{lightgray!30}{#1}}%
+}
+
+\begin{document}
+\pagestyle{empty}
+\titlespacing{\section}{0pt}{0pt}{0pt}
+\titlespacing{\subsection}{0pt}{2pt}{2pt}
+\titlespacing{\subsubsection}{0pt}{1pt}{1pt}
+
+
+\centerline{\fontsize{20}{28}{\bf{asmboy4gb}} C H E A T  S H E E T} % Poster title
+\begin{multicols}{2}
+\subsection*{Graphics}
+All the values below can only be changed while in a VBlank.
+\subsubsection*{VRAM tiles}
+Every tile (8x8 pixels) consists of 16 bytes. 2 bit per pixel give the color index. Two bytes represent one line. For every pixel the most significant bit is taken from the second byte
+ and the least significant bit from first byte for the line.
+ \begin{tabular}{ c c c }
+    \bf Address & \bf Object & \bf Background \\ 
+    \Address{\$8000-\$87FF} & 0-128 & - \\  
+    \Address{\$8800-\$8FFF} & 128-255 & 128-255 \\
+    \Address{\$9000-\$97FF}  & - & 0-127    
+   \end{tabular}
+The background is 32x32 tiles big (256x256 pixels). Every byte of the tilemap is one id of background tile from the table above.
+\begin{tabular}{ c c }
+    \Address{\$9800-\$981F} & first line \\  
+    \Address{\$9820-\$983F} & second line \\
+     ... & \\
+     \Address{\$9BE0-\$9BFF}  & last line   
+   \end{tabular}
+
+\subsubsection*{Object attribute memory (OAM)}
+   Every of the 40 objects has 4 bytes in the memory area \Address{\$FE00-\$FE9F} \\
+\begin{tabular}{ c c }
+    Byte 0 & Y position. Top = 16 \\  
+    Byte 1 & X position. Left = 8 \\
+    Byte 2 & Object VRAM tile number  \\
+    Byte 3 & Is a bitmap, see table below \\
+   \end{tabular}
+\\
+\begin{tabular}{ c c }
+    Bit 4 & Palette number \\
+    Bit 5 & X flip if set \\
+    Bit 6 & Y flip if set \\
+    Bit 7 & Background before objects if set
+   \end{tabular}
+\subsubsection*{Moving Background view}
+With \Address{\$FF42} the Y position and with \Address{\$FF43} the X position of the visible view is controlled. The visible view is 160x144 pixels out of the 256x256 pixels in the background tilemap.
+\subsubsection*{Color palettes}
+\Address{\$FF47} Is the color palette for the background tiles. The first two bits give the color for index 0, third and forth bit for color of index 1 etc.
+\\
+\begin{tabular}{ c c }
+    0 & White \\
+    1 & Light gray \\
+    2 & Darker gray \\
+    3 & Black
+   \end{tabular}
+   \\
+\Address{\$FF48} and \Address{\$FF49} give the color for the object tiles. Which of this two palettes is taken is choosen by bit 4 in byte 3 in OAM. They work as the background palette but 0 is transparent instead of white.
+\subsubsection*{\textasciitilde 16kHz timer: \Address{\$FF04} }
+\subsection*{Functions to call}
+All the functions below can be called with their address. They dont modify any other registers besides the argument and the return.
+% Keep in sync with asmboy4gb.map
+\subsubsection*{\Address{\$0150} Wait for next VBlank}
+No arguments, no return. After this returns the VBlank just started and can be fully used to access graphic memory.
+\subsubsection*{\Address{\$0163} Clear Background}
+No arguments, no return. Sets the background to the empty tile 0 which is set to all white. After this returns the VBlank just started and can be fully used to access graphic memory.
+\subsubsection*{\Address{\$018C} Get DPad}
+Returns all keys pressed in register a. If the bit is 0 it means the corresponding key is pressed
+
+\begin{tabular}{ c c }
+    Bit 0 & Right \\
+    Bit 1 & Left\\
+    Bit 2 &  Up \\
+    Bit 3 & Down
+   \end{tabular}
+
+\subsubsection*{\Address{\$019E} Get Buttons}
+Same as DPad. Start button will exit.
+   \begin{tabular}{ c c }
+       Bit 0 & A Button \\
+       Bit 1 & B Button\\
+       Bit 2 &  Select Button \\
+       Bit 3 & Start Button 
+      \end{tabular}
+
+
+\subsubsection*{\Address{\$01B0} Print Number}
+Number to print in a. Destination in tilemap \Address{\$9800-\$9BFF} in hl
+
+\subsubsection*{\Address{\$01CC} Print Game Over Screen}
+Destination in tilemap \Address{\$9800-\$9BFF} in hl. Returns only after A was pressed.
+
+\end{multicols}
+\end{document}
