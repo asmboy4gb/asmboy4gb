@@ -26,6 +26,7 @@ The generated asmboy4gb.gb should be startable with any gameboy emulator
 | A   | in sub-menu: select the item and continue|
 
 ## Usage Video:
+[![Developing a catch the drop game](https://img.youtube.com/vi/VAwM6U3sdx4/maxresdefault.jpg)](https://www.youtube.com/watch?v=VAwM6U3sdx4)
 
 The provided savegame asmboy4gb.sav is the game programmed in the video.
 To start the game load the game in an emulator like BGB.
