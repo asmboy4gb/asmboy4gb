@@ -110,8 +110,19 @@ _GetButtonsRet:
 ; a value to print (only 0-99)
 PrintNumberAsDecimal:
 	push bc
+	ld b, "0"
+	ld c, 100
+_Above100:
 	cp a, 100 ; ignore numbers >= 100
-	jp nc, _PrintNumberAsDecimalExit
+	jp c, _LessThan100
+	inc b
+	sub a,c
+	jp _Above100
+_LessThan100:
+	ld c,a
+	ld a,b
+	ld [hli], a
+	ld a,c
 	ld b,0
 	ld c, 10
 _LoopDivideBy10:
@@ -140,7 +151,7 @@ PrintGameOver:
 	push bc
 	push de
 	push hl
-	call ClearBackground
+	;call ClearBackground ; disabled to keep highscore
 	ld de, GameOverTextLine1
 	ld bc, GameOverTextLine1End - GameOverTextLine1
 	call printStr
@@ -162,16 +173,6 @@ _PrintGameOverExit:
 	pop bc
 	pop af
 	ret
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
 	nop
 	nop
 	nop
@@ -1880,6 +1881,8 @@ LoopOverCdsLabelsIncrease:
 CheckSecondByte:
 	cp a, b
 	jp c, ByteSmaller
+	dec hl
+	ld a, [hli] ; Load a again as it might be changed by FirstByteSmaller
 	push hl
 	ld h, a
 	ld l, d
@@ -1925,6 +1928,8 @@ LoopOverCdsLabelsDecrease:
 CheckSecondByteDecrease:
 	cp a, b
 	jp c, ByteSmallerDecrease
+	dec hl
+	ld a, [hli] ; Load a again as it might be changed by FirstByteSmaller
 	push hl
 	ld h,a
 	ld a, d
